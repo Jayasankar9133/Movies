@@ -27,7 +27,7 @@ const initializeDBAndServer = async () => {
 
 initializeDBAndServer();
 
-const caseConversion = (dbData) => {
+const caseConversionId = (dbData) => {
   return {
     movieId: dbData.movie_id,
     directorId: dbData.director_id,
@@ -36,17 +36,23 @@ const caseConversion = (dbData) => {
   };
 };
 
+const caseConversion = (dbData) => {
+  return {
+    movieName: dbData.movie_name,
+  };
+};
+
 const dirConversion = (data) => {
   return {
     directorId: data.director_id,
-    directorName: director_name,
+    directorName: data.director_name,
   };
 };
 
 ////Get
 
 app.get("/movies/", async (request, response) => {
-  const getMoviesQuery = `SELECT * FROM movie;`;
+  const getMoviesQuery = `SELECT movie_name FROM movie;`;
   const moviesArray = await db.all(getMoviesQuery);
   response.send(moviesArray.map((dbData) => caseConversion(dbData)));
 });
@@ -63,7 +69,7 @@ app.get("/movies/:movieId/", async (request, response) => {
     WHERE
       movie_id = ${movieId};`;
   const movie = await db.get(getMovieQuery);
-  response.send(caseConversion(movie));
+  response.send(caseConversionId(movie));
 });
 
 ////Post
@@ -112,13 +118,13 @@ app.get("/directors/:directorId/movies/", async (request, response) => {
   const { directorId } = request.params;
   const getDirQuery = `
     SELECT
-      *
+      movie_name
     FROM
-      director
+      movie
     WHERE
       director_id = ${directorId};`;
   const director = await db.get(getDirQuery);
-  response.send(dirConversion(director));
+  response.send(caseConversion(director));
 });
 
 module.exports = app;
